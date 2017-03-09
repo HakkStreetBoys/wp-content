@@ -67,8 +67,6 @@
 
 								</footer>
 
-								<?php comments_template(); ?>
-
 							</article>
 
 							<?php endwhile; ?>
@@ -90,8 +88,6 @@
 							<?php endif; ?>
 
 						</main>
-
-						<?php get_sidebar(); ?>
 
 				</div>
 
