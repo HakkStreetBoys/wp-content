@@ -16,33 +16,33 @@ URL: http://themble.com/bones/
 
 // Flush rewrite rules for custom post types
 add_action( 'after_switch_theme', 'bones_flush_rewrite_rules' );
-
+wp_set_object_terms( 123, 'menu', 'menu_cat' );
 // Flush your rewrite rules
 function bones_flush_rewrite_rules() {
 	flush_rewrite_rules();
 }
 
 // let's create the function for the custom type
-function Menu() {
+function menu() {
 	// creating (registering) the custom type
 	register_post_type( 'menu', /* (http://codex.wordpress.org/Function_Reference/register_post_type) */
 		// let's now add all the options for this post type
 		array( 'labels' => array(
-			'name' => __( 'Menu', 'bonestheme' ), /* This is the Title of the Group */
-			'singular_name' => __( 'Menu', 'bonestheme' ), /* This is the individual type */
-			'all_items' => __( 'All Menu Items', 'bonestheme' ), /* the all items menu item */
+			'name' => __( 'menu', 'bonestheme' ), /* This is the Title of the Group */
+			'singular_name' => __( 'menu', 'bonestheme' ), /* This is the individual type */
+			'all_items' => __( 'All menu Items', 'bonestheme' ), /* the all items menu item */
 			'add_new' => __( 'Add New', 'bonestheme' ), /* The add new menu item */
 			'add_new_item' => __( 'Add New Item', 'bonestheme' ), /* Add New Display Title */
 			'edit' => __( 'Edit', 'bonestheme' ), /* Edit Dialog */
 			'edit_item' => __( 'Edit Item', 'bonestheme' ), /* Edit Display Title */
 			'new_item' => __( 'New Item', 'bonestheme' ), /* New Display Title */
 			'view_item' => __( 'View Item', 'bonestheme' ), /* View Display Title */
-			'search_items' => __( 'Search Menu', 'bonestheme' ), /* Search Custom Type Title */
+			'search_items' => __( 'Search menu', 'bonestheme' ), /* Search Custom Type Title */
 			'not_found' =>  __( 'Nothing found in the Database.', 'bonestheme' ), /* This displays if there are no entries yet */
 			'not_found_in_trash' => __( 'Nothing found in Trash', 'bonestheme' ), /* This displays if there is nothing in the trash */
 			'parent_item_colon' => ''
 			), /* end of arrays */
-			'description' => __( 'This is my Menu', 'bonestheme' ), /* Custom Type Description */
+			'description' => __( 'This is my menu', 'bonestheme' ), /* Custom Type Description */
 			'public' => true,
 			'publicly_queryable' => true,
 			'exclude_from_search' => false,
@@ -52,7 +52,7 @@ function Menu() {
 			'show_in_rest' => true,
   		'rest_base' => 'menu',
 			//'menu_icon' => get_stylesheet_directory_uri() . '/library/images/custom-post-icon.png', /* the icon for the custom post type menu */
-			'rewrite'	=> array( 'slug' => 'Menu', 'with_front' => false ), /* you can specify its url slug */
+			'rewrite'	=> array( 'slug' => 'menu'), /* you can specify its url slug */
 			'has_archive' => false, /* you can rename the slug here */
 			'capability_type' => 'post',
 			'hierarchical' => false,
@@ -62,14 +62,37 @@ function Menu() {
 	); /* end of register post type */
 
 	/* this adds your post categories to your custom post type */
-	//register_taxonomy_for_object_type( 'category', 'Menu' );
+	//register_taxonomy_for_object_type( 'category', 'menu' );
 	/* this adds your post tags to your custom post type */
-	//register_taxonomy_for_object_type( 'post_tag', 'Menu' );
+	//register_taxonomy_for_object_type( 'post_tag', 'menu' );
 
 }
 
+function add_custom_types_to_tax( $query ) {
+if( is_category() || is_tag() && empty( $query->query_vars['suppress_filters'] ) ) {
+
+// Get all your post types
+$post_types = get_post_types();
+
+$query->set( 'menu', $post_types );
+return $query;
+}
+}
+add_filter( 'pre_get_posts', 'add_custom_types_to_tax' );
+
 	// adding the function to the Wordpress init
-	add_action( 'init', 'menu');
+	// add_action( 'init', 'menu');
+	add_action( 'init', 'menu' );
+	function sb_post_type_rest_support() {
+			global $wp_post_types;
+			//be sure to set this to the name of your post type!
+			$post_type_name = 'menu';
+			if( isset( $wp_post_types[ $post_type_name ] ) ) {
+					$wp_post_types[$post_type_name]->show_in_rest = true;
+					$wp_post_types[$post_type_name]->rest_base = $post_type_name;
+					$wp_post_types[$post_type_name]->rest_controller_class = 'WP_REST_Posts_Controller';
+			}
+	}
 
 	/*
 	for more information on taxonomies, go here:
@@ -95,9 +118,9 @@ function Menu() {
 			'show_admin_column' => true,
 			'show_ui' => true,
 			'query_var' => true,
-			'rewrite' => array( 'slug' => 'Menu-category' ),
+			'rewrite' => array( 'slug' => 'menu_cat' ),
 			'show_in_rest' => true,
-  		'rest_base' => 'genre',
+  		// 'rest_base' => 'genre',
 		)
 	);
 
@@ -120,8 +143,12 @@ function Menu() {
 			'show_admin_column' => true,
 			'show_ui' => true,
 			'query_var' => true,
+			'show_in_rest' => true,
+			// 'rest_base' => 'genre',
 		)
 	);
+
+
 
 	/*
 		looking for custom meta boxes?

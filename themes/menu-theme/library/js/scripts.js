@@ -110,6 +110,52 @@ function loadGravatars() {
 */
 jQuery(document).ready(function($) {
 
+	var menuPostsContainer = document.getElementById("menuId");
+
+window.addEventListener("load", function() {
+			var ourRequest = new XMLHttpRequest();
+			// ourRequest.open('GET', 'http://localhost:8888/repeat-menu/wp-json/wp/v2/menu?filter', ['genre', ]'=drykkir');
+			ourRequest.open('GET', 'http://localhost:8888/repeat-menu/wp-json/wp/v2/menu?menu_cat=9');
+		ourRequest.onload = function() {
+		if (ourRequest.status >= 200 && ourRequest.status < 400) {
+			var data = JSON.parse(ourRequest.responseText);
+			createHTML(data);
+			console.log(data);
+		} else {
+		console.log("We connected to the server, but it returned an error.");
+		}
+		};
+
+		ourRequest.onerror = function() {
+		console.log("Connection error");
+		};
+
+		ourRequest.send();
+});
+
+
+	// Call the /posts endpoint via the WordPress API
+	// $.get("http://localhost:8888/repeat-menu/wp-json/wp/v2/menu", function (posts) {
+	// 	// console.log(posts);
+  // 		// Loop through all the posts returned and console.log() each of
+  // 		// their HTML content
+  //   		$.each(posts, function(index, post) {
+	// 				// console.log(post.content['rendered']);
+  //   			console.log(post.menu_cat);
+	// 				createHTML(posts);
+	//
+  //   		});
+	// });
+
+function createHTML(menuData) {
+		var ourHTMLString = '';
+		for (i = 0; i < menuData.length; i++) {
+			ourHTMLString += '<h2>' + menuData[i].acf.menu_title + '</h2>';
+			ourHTMLString += menuData[i].acf.menu_description;
+		}
+		menuPostsContainer.innerHTML = ourHTMLString;
+}
+
   /*
    * Let's fire off the gravatar function
    * You can remove this if you don't need it
